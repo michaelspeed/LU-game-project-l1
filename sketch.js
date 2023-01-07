@@ -1,6 +1,6 @@
 /*
 
-The Game Project
+The Game Project - stage 4
 author: Risha Sringa Chanmgai
 date: 07-01-2023
 */
@@ -44,8 +44,7 @@ var mountains = []
 var cameraPosX = 0
 
 
-function setup()
-{
+function setup() {
 	createCanvas(1024, 576);
 	floorPos_y = height * 3/4;
 	gameChar_x = width/2;
@@ -59,8 +58,7 @@ function setup()
 	mountains = [{x:20, height:200}, {x: 800, height: 150}]
 }
 
-function draw()
-{
+function draw() {
 
 	///////////DRAWING CODE//////////
 
@@ -90,42 +88,32 @@ function draw()
 
 
 	//the game character
-	if(state.isLeft && state.isFalling)
-	{
+	if(state.isLeft && state.isFalling) {
 		// add your jumping-left code
 		stickman.jumpToLeft(gameChar_x, gameChar_y, 'red')
 
-	}
-	else if(state.isRight && state.isFalling)
-	{
+	} else if(state.isRight && state.isFalling) {
 		// add your jumping-right code
 		stickman.jumpToRight(gameChar_x, gameChar_y, 'red')
 
-	}
-	else if(state.isLeft)
-	{
+	} else if(state.isLeft) {
 		// add your walking left code
 		stickman.renderWalkLeft(gameChar_x, gameChar_y, 'blue')
 
-	}
-	else if(state.isRight)
-	{
+	} else if(state.isRight) {
 		// add your walking right code
 		stickman.renderWalkRight(gameChar_x, gameChar_y, 'blue')
 
-	}
-	else if(state.isFalling || state.isPlummeting)
-	{
+	} else if(state.isFalling || state.isPlummeting) {
 		// add your jumping facing forwards code
 		stickman.renderJumpForward(gameChar_x, gameChar_y, 'red')
 
-	}
-	else
-	{
+	} else {
 		// add your standing front facing code
 		stickman.render(gameChar_x, gameChar_y, 'blue')
 
 	}
+	pop()
 
 	///////////INTERACTION CODE//////////
 	//Put conditional statements to move the game character below here
@@ -142,6 +130,8 @@ function draw()
 		if (gameChar_y === floorPos_y) {
 			state.isFalling = false
 		}
+	} else if (state.isFalling) {
+		gameChar_y -= jumpDelta
 	}
 
 	if (gameChar_x >= collectable.x_pos - collectable.size / 2 && gameChar_x <= collectable.x_pos + collectable.size / 2) {
@@ -156,28 +146,40 @@ function draw()
 		state.isFalling = false
 		gameChar_y += jumpDelta
 		if (gameChar_y > height) {
+			// reset the game
 			state.isPlummeting = false
 			gameChar_y = floorPos_y
 			gameChar_x = width/2
 			cameraPosX = 0
 		}
 	}
-	pop()
 
 	// No loop needed if we use keyIsDown
 	if (keyIsDown(LEFT_ARROW)) {
-		cameraPosX -= walkDelta
+		if (state.isFalling && gameChar_y < floorPos_y) {
+			if (keyIsDown(UP_ARROW)) {
+				cameraPosX -= walkDelta
+			}
+		} else {
+			cameraPosX -= walkDelta
+		}
 	}
 	if (keyIsDown(RIGHT_ARROW)) {
-		cameraPosX += walkDelta
+		if (state.isFalling && gameChar_y < floorPos_y) {
+			if (keyIsDown(UP_ARROW)) {
+				cameraPosX += walkDelta
+			}
+		} else {
+			cameraPosX += walkDelta
+		}
 	}
 }
 
 
-function keyPressed()
-{
+function keyPressed() {
 	// if statements to control the animation of the character when
 	// keys are pressed.
+	console.log('key pressed: ' + keyCode)
 
 	if (keyCode === 65 || keyCode === 37) {
 		state.isLeft = true;
@@ -192,8 +194,7 @@ function keyPressed()
 	}
 }
 
-function keyReleased()
-{
+function keyReleased() {
 	// if statements to control the animation of the character when
 	// keys are released.
 	resetStats()
