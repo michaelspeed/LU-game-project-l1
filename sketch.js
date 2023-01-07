@@ -34,6 +34,9 @@ var canyon;
 // Trees
 var trees_x = []
 
+// Clouds
+var clouds = []
+
 
 function setup()
 {
@@ -45,7 +48,8 @@ function setup()
 	stickman = new StickMan(gameChar_x, gameChar_y, 'blue', 80)
 	collectable = {x_pos: 100, y_pos: gameChar_y - 20, size: 30, isFound: false}
 	canyon = {x_pos: 200, width: 100}
-	trees_x = [300, 350, 400, 450]
+	trees_x = [300, 350, 400, 450, 520, 640]
+	clouds = [{x:100, y:50}, {x: 350, y: 100}, {x: 600, y: 50}]
 }
 
 function draw()
@@ -68,6 +72,9 @@ function draw()
 
 	// Draw the trees
 	trees_x.forEach(drawTree)
+
+	// Draw the clouds
+	clouds.forEach(drawClouds)
 
 	//the game character
 	if(state.isLeft && state.isFalling)
@@ -463,4 +470,11 @@ function drawTree(x) {
 	ellipse(x,350,60,40);
 	ellipse(x + 80,350,60,40);
 	ellipse(x + 40,320,40,20);
+}
+
+function drawClouds({x, y}) {
+	fill(255);
+	ellipse(x,y,150,50);
+	ellipse(x - 50,y + 25,50,30);
+	ellipse(x + 50,y + 15,50,30);
 }
