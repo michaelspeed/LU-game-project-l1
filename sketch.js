@@ -37,6 +37,12 @@ var trees_x = []
 // Clouds
 var clouds = []
 
+// Mountains
+var mountains = []
+
+// Camera positioning
+var cameraPosX = 0
+
 
 function setup()
 {
@@ -46,10 +52,11 @@ function setup()
 	gameChar_y = floorPos_y;
 
 	stickman = new StickMan(gameChar_x, gameChar_y, 'blue', 80)
-	collectable = {x_pos: 100, y_pos: gameChar_y - 20, size: 30, isFound: false}
+	collectable = {x_pos: 600, y_pos: gameChar_y - 20, size: 30, isFound: false}
 	canyon = {x_pos: 200, width: 100}
-	trees_x = [300, 350, 400, 450, 520, 640]
+	trees_x = [300, 350, 400, 450, 520,]
 	clouds = [{x:100, y:50}, {x: 350, y: 100}, {x: 600, y: 50}]
+	mountains = [{x:20, height:200}, {x: 800, height: 150}]
 }
 
 function draw()
@@ -64,6 +71,8 @@ function draw()
 	fill(0,155,0);
 	rect(0, floorPos_y, width, height - floorPos_y); //draw some green ground
 
+	push()
+	translate(-cameraPosX, 0)
 	// Draw the collectible object
 	drawRing(collectable)
 
@@ -73,8 +82,12 @@ function draw()
 	// Draw the trees
 	trees_x.forEach(drawTree)
 
+	// Draw the mountains
+	mountains.forEach(drawMountains)
+
 	// Draw the clouds
 	clouds.forEach(drawClouds)
+
 
 	//the game character
 	if(state.isLeft && state.isFalling)
@@ -146,7 +159,17 @@ function draw()
 			state.isPlummeting = false
 			gameChar_y = floorPos_y
 			gameChar_x = width/2
+			cameraPosX = 0
 		}
+	}
+	pop()
+
+	// No loop needed if we use keyIsDown
+	if (keyIsDown(LEFT_ARROW)) {
+		cameraPosX -= walkDelta
+	}
+	if (keyIsDown(RIGHT_ARROW)) {
+		cameraPosX += walkDelta
 	}
 }
 
@@ -477,4 +500,16 @@ function drawClouds({x, y}) {
 	ellipse(x,y,150,50);
 	ellipse(x - 50,y + 25,50,30);
 	ellipse(x + 50,y + 15,50,30);
+}
+
+function drawMountains({x, height}) {
+	const y = floorPos_y - height
+	fill(220);
+	triangle(x, y, x + 150, floorPos_y, x - 150, floorPos_y);
+	fill(128);
+	triangle(x, y, x + 90, floorPos_y, x - 150, floorPos_y);
+	fill(200);
+	triangle(x + 50, y + 50, x + 150, floorPos_y, x + 80, floorPos_y);
+	fill(128);
+	triangle(x + 50, y + 50, x, floorPos_y, x + 80, floorPos_y);
 }
