@@ -1,4 +1,6 @@
-### The Game Project 3 – Game Character interaction
+### The Game Project 4
+
+Following is the list of previous versions of the project (3b).
 
 Now to add some proper interaction to your game.
 

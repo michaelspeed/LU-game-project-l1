@@ -1,8 +1,13 @@
 /*
 
 The Game Project - stage 4
-author: Risha Sringa Chanmgai
-date: 07-01-2023
+Author: Risha Sringa Chanmgai - (https://github.com/michaelspeed)
+Date: 07-01-2023
+Git status: initialized after 3b, for more info check git history
+Additional files: p5.js (for better completions in webstorm, preferred IDE)
+
+Stickman is a superhuman, can jump large distance
+for better playability jumping is done by pressing up arrow key + left or right arrow key and can be controlled in flight
 */
 
 
@@ -61,7 +66,6 @@ function setup() {
 function draw() {
 
 	///////////DRAWING CODE//////////
-
 	background(100,155,255); //fill the sky blue
 
 
@@ -77,24 +81,24 @@ function draw() {
 	//draw the canyon
 	drawCanyon(canyon)
 
-	// Draw the trees
+	// Draw the trees (using forEach loop instead of for loop which is much cleaner)
 	trees_x.forEach(drawTree)
 
-	// Draw the mountains
+	// Draw the mountains (using forEach loop instead of for loop which is much cleaner)
 	mountains.forEach(drawMountains)
 
-	// Draw the clouds
+	// Draw the clouds (using forEach loop instead of for loop which is much cleaner)
 	clouds.forEach(drawClouds)
 
 
 	//the game character
 	if(state.isLeft && state.isFalling) {
 		// add your jumping-left code
-		stickman.jumpToLeft(gameChar_x, gameChar_y, 'red')
+		stickman.renderJumpToLeft(gameChar_x, gameChar_y, 'red')
 
 	} else if(state.isRight && state.isFalling) {
 		// add your jumping-right code
-		stickman.jumpToRight(gameChar_x, gameChar_y, 'red')
+		stickman.renderJumpToRight(gameChar_x, gameChar_y, 'red')
 
 	} else if(state.isLeft) {
 		// add your walking left code
@@ -116,32 +120,42 @@ function draw() {
 	pop()
 
 	///////////INTERACTION CODE//////////
-	//Put conditional statements to move the game character below here
 	if (state.isLeft) {
+		// move the game character to the left
 		gameChar_x -= walkDelta
 	}
+
 	if (state.isRight) {
+		// move the game character to the right
 		gameChar_x += walkDelta
 	}
+
 	if (state.isFalling && (state.isLeft || state.isRight)) {
+		// move the game character up
 		gameChar_y -= jumpDelta
 	} else if (state.isFalling && gameChar_y < floorPos_y) {
+		// move the game character down
 		gameChar_y += jumpDelta
 		if (gameChar_y === floorPos_y) {
+			// character has landed
 			state.isFalling = false
 		}
 	} else if (state.isFalling) {
+		// character is falling
 		gameChar_y -= jumpDelta
 	}
 
+	// if the collectable item has been found
 	if (gameChar_x >= collectable.x_pos - collectable.size / 2 && gameChar_x <= collectable.x_pos + collectable.size / 2) {
 		collectable.isFound = true
 	}
 
+	// if the game character is over the canyon it falls to death
 	if (gameChar_x >= (canyon.x_pos) && gameChar_x <= (canyon.x_pos + canyon.width) && !state.isFalling) {
 		state.isPlummeting = true
 	}
 
+	// if the game character has fallen to death, reset the game
 	if (state.isPlummeting) {
 		state.isFalling = false
 		gameChar_y += jumpDelta
@@ -177,9 +191,6 @@ function draw() {
 
 
 function keyPressed() {
-	// if statements to control the animation of the character when
-	// keys are pressed.
-	console.log('key pressed: ' + keyCode)
 
 	if (keyCode === 65 || keyCode === 37) {
 		state.isLeft = true;
@@ -195,16 +206,17 @@ function keyPressed() {
 }
 
 function keyReleased() {
-	// if statements to control the animation of the character when
-	// keys are released.
 	resetStats()
 }
 
+
+// resets necessary states
 function resetStats() {
 	state.isLeft = false
 	state.isRight = false
 }
 
+// Game Character class
 class StickMan {
 	constructor(x, y, color, height) {
 		this.x = x;
@@ -213,12 +225,7 @@ class StickMan {
 		this.height = height
 	}
 
-	update(x, y, color) {
-		this.x = x;
-		this.y = y;
-		this.color = color ? color : this.color;
-	}
-
+	// Renders while standing
 	render(x, y, color) {
 		this.color = color ? color : this.color;
 
@@ -243,7 +250,7 @@ class StickMan {
 
 		// head
 		circle(headX, headY, headDiameter);
-		stroke(126);
+		stroke(0);
 
 		// body
 		line(headX, headY + headRadius, headX, headY + headRadius + bodyHeight);
@@ -260,6 +267,7 @@ class StickMan {
 		pop();
 	}
 
+	// Renders while jumping
 	renderJumpForward(x, y, color) {
 		this.color = color ? color : this.color;
 
@@ -284,7 +292,7 @@ class StickMan {
 
 		// head
 		circle(headX, headY, headDiameter);
-		stroke(126);
+		stroke(0);
 
 		// body
 		line(headX, headY + headRadius, headX, headY + headRadius + bodyHeight);
@@ -301,6 +309,7 @@ class StickMan {
 		pop();
 	}
 
+	// Renders while walking left
 	renderWalkLeft(x, y, color) {
 		this.color = color ? color : this.color;
 
@@ -325,7 +334,7 @@ class StickMan {
 
 		// head
 		circle(headX, headY, headDiameter);
-		stroke(126);
+		stroke(0);
 
 		// body
 		line(headX, headY + headRadius, headX, headY + headRadius + bodyHeight);
@@ -342,6 +351,7 @@ class StickMan {
 		pop();
 	}
 
+	// Renders while walking right
 	renderWalkRight(x, y, color) {
 		this.color = color ? color : this.color;
 		// compute the dimensions of the body parts
@@ -365,7 +375,7 @@ class StickMan {
 
 		// head
 		circle(headX, headY, headDiameter);
-		stroke(126);
+		stroke(0);
 
 		// body
 		line(headX, headY + headRadius, headX, headY + headRadius + bodyHeight);
@@ -382,7 +392,8 @@ class StickMan {
 		pop();
 	}
 
-	jumpToRight(x, y, color) {
+	// Renders while jumping right
+	renderJumpToRight(x, y, color) {
 		this.color = color ? color : this.color;
 		// compute the dimensions of the body parts
 		const headDiameter = this.height * 0.2;
@@ -405,7 +416,7 @@ class StickMan {
 
 		// head
 		circle(headX, headY, headDiameter);
-		stroke(126);
+		stroke(0);
 
 		// body
 		line(headX, headY + headRadius, headX, headY + headRadius + bodyHeight);
@@ -422,7 +433,8 @@ class StickMan {
 		pop();
 	}
 
-	jumpToLeft(x, y, color) {
+	// Renders while jumping left
+	renderJumpToLeft(x, y, color) {
 		this.color = color ? color : this.color;
 		// compute the dimensions of the body parts
 		const headDiameter = this.height * 0.2;
@@ -445,7 +457,7 @@ class StickMan {
 
 		// head
 		circle(headX, headY, headDiameter);
-		stroke(126);
+		stroke(0);
 
 		// body
 		line(headX, headY + headRadius, headX, headY + headRadius + bodyHeight);
@@ -463,6 +475,7 @@ class StickMan {
 	}
 }
 
+// Collectible item
 function drawRing({x_pos, y_pos, size}){
 	if (!collectable.isFound) {
 		fill(255,215, 0);
@@ -472,6 +485,7 @@ function drawRing({x_pos, y_pos, size}){
 	}
 }
 
+// Canyon
 function drawCanyon({x_pos, width}) {
 	let deltaDiff = 220
 	let alphaDiff = 10
@@ -483,6 +497,7 @@ function drawCanyon({x_pos, width}) {
 	quad(x_pos, 432, x_pos + width, 432, x_pos + width - alphaDiff, 440, x_pos + alphaDiff, 440);
 }
 
+// A single tree
 function drawTree(x) {
 	fill(175, 75, 0);
 	rect(x + 30, 338, 20, 100, 20);
@@ -496,6 +511,7 @@ function drawTree(x) {
 	ellipse(x + 40,320,40,20);
 }
 
+// A single cloud
 function drawClouds({x, y}) {
 	fill(255);
 	ellipse(x,y,150,50);
@@ -503,6 +519,7 @@ function drawClouds({x, y}) {
 	ellipse(x + 50,y + 15,50,30);
 }
 
+// A single mountain
 function drawMountains({x, height}) {
 	const y = floorPos_y - height
 	fill(220);
