@@ -6,6 +6,8 @@ Date: 07-01-2023
 Git status: initialized after 3b, for more info check git history
 Additional files: p5.js (for better completions in webstorm, preferred IDE)
 
+Zip files: [index.html, sketch.js, p5.js, p5.min.js, .git, .idea]
+
 Stickman is a superhuman, can jump large distance
 for better playability jumping is done by pressing up arrow key + left or right arrow key and can be controlled in flight
 */
@@ -31,10 +33,10 @@ const jumpDelta = 4
 const walkDelta = 10
 
 // Collectable
-var collectable;
+var collectables = [];
 
 // Canyon
-var canyon;
+var canyons = [];
 
 // Trees
 var trees_x = []
@@ -56,8 +58,8 @@ function setup() {
 	gameChar_y = floorPos_y;
 
 	stickman = new StickMan(gameChar_x, gameChar_y, 'blue', 80)
-	collectable = {x_pos: 600, y_pos: gameChar_y - 20, size: 30, isFound: false}
-	canyon = {x_pos: 200, width: 100}
+	collectables = [{x_pos: 600, y_pos: gameChar_y - 20, size: 30, isFound: false}, {x_pos: 300, y_pos: gameChar_y - 150, size: 30, isFound: false}, {x_pos: 200, y_pos: gameChar_y - 250, size: 30, isFound: false}]
+	canyons = [{x_pos: 200, width: 100}, {x_pos: 600, width: 50}]
 	trees_x = [300, 350, 400, 450, 520,]
 	clouds = [{x:100, y:50}, {x: 350, y: 100}, {x: 600, y: 50}]
 	mountains = [{x:20, height:200}, {x: 800, height: 150}]
@@ -76,10 +78,10 @@ function draw() {
 	push()
 	translate(-cameraPosX, 0)
 	// Draw the collectible object
-	drawRing(collectable)
+	collectables.forEach(drawCollectable)
 
 	//draw the canyon
-	drawCanyon(canyon)
+	canyons.forEach(drawCanyon)
 
 	// Draw the trees (using forEach loop instead of for loop which is much cleaner)
 	trees_x.forEach(drawTree)
@@ -146,14 +148,18 @@ function draw() {
 	}
 
 	// if the collectable item has been found
-	if (gameChar_x >= collectable.x_pos - collectable.size / 2 && gameChar_x <= collectable.x_pos + collectable.size / 2) {
-		collectable.isFound = true
-	}
+	collectables.forEach(collectable => {
+		if (gameChar_x >= collectable.x_pos - collectable.size / 2 && gameChar_x <= collectable.x_pos + collectable.size / 2) {
+			collectable.isFound = true
+		}
+	})
 
 	// if the game character is over the canyon it falls to death
-	if (gameChar_x >= (canyon.x_pos) && gameChar_x <= (canyon.x_pos + canyon.width) && !state.isFalling) {
-		state.isPlummeting = true
-	}
+	canyons.forEach(canyon => {
+		if (gameChar_x >= (canyon.x_pos) && gameChar_x <= (canyon.x_pos + canyon.width) && !state.isFalling) {
+			state.isPlummeting = true
+		}
+	})
 
 	// if the game character has fallen to death, reset the game
 	if (state.isPlummeting) {
@@ -476,8 +482,9 @@ class StickMan {
 }
 
 // Collectible item
-function drawRing({x_pos, y_pos, size}){
-	if (!collectable.isFound) {
+// t_collectable = {x_pos, y_pos, size, isFound}
+function drawCollectable({x_pos, y_pos, size, isFound}){
+	if (!isFound) {
 		fill(255,215, 0);
 		ellipse(x_pos, y_pos, size, size);
 		fill(100, 155, 255);
@@ -486,6 +493,7 @@ function drawRing({x_pos, y_pos, size}){
 }
 
 // Canyon
+// canyon = {x_pos, width}
 function drawCanyon({x_pos, width}) {
 	let deltaDiff = 220
 	let alphaDiff = 10
