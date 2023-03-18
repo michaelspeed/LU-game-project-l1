@@ -50,6 +50,21 @@ var mountains = []
 // Camera positioning
 var cameraPosX = 0
 
+// Game Score
+var game_score = 0
+
+// Flagpole
+var flagpole = {x_pos: 100, isReached: false}
+
+// Lives
+var lives = 3
+
+// Game State
+var gameState = {
+	finished: false,
+	gameOver: false,
+}
+
 
 function setup() {
 	createCanvas(1024, 576);
@@ -61,7 +76,7 @@ function setup() {
 	collectables = [{x_pos: 600, y_pos: gameChar_y - 20, size: 30, isFound: false}, {x_pos: 300, y_pos: gameChar_y - 150, size: 30, isFound: false}, {x_pos: 200, y_pos: gameChar_y - 250, size: 30, isFound: false}]
 	canyons = [{x_pos: 200, width: 100}, {x_pos: 600, width: 50}]
 	trees_x = [300, 350, 400, 450, 520,]
-	clouds = [{x:100, y:50}, {x: 350, y: 100}, {x: 600, y: 50}]
+	clouds = [{x:100, y:130}, {x: 350, y: 100}, {x: 600, y: 50}]
 	mountains = [{x:20, height:200}, {x: 800, height: 150}]
 }
 
@@ -92,6 +107,17 @@ function draw() {
 	// Draw the clouds (using forEach loop instead of for loop which is much cleaner)
 	clouds.forEach(drawClouds)
 
+	drawGameScore()
+
+	drawFlagPole()
+
+	checkFlagpole()
+
+	drawLives()
+
+	checkIfGameHasWon()
+
+	drawGameStates()
 
 	//the game character
 	if(state.isLeft && state.isFalling) {
@@ -150,7 +176,10 @@ function draw() {
 	// if the collectable item has been found
 	collectables.forEach(collectable => {
 		if (gameChar_x >= collectable.x_pos - collectable.size / 2 && gameChar_x <= collectable.x_pos + collectable.size / 2) {
-			collectable.isFound = true
+			if (!collectable.isFound) {
+				collectable.isFound = true
+				game_score += 1
+			}
 		}
 	})
 
@@ -167,6 +196,7 @@ function draw() {
 		gameChar_y += jumpDelta
 		if (gameChar_y > height) {
 			// reset the game
+			checkLives()
 			state.isPlummeting = false
 			gameChar_y = floorPos_y
 			gameChar_x = width/2
@@ -214,7 +244,6 @@ function keyPressed() {
 function keyReleased() {
 	resetStats()
 }
-
 
 // resets necessary states
 function resetStats() {
@@ -538,4 +567,65 @@ function drawMountains({x, height}) {
 	triangle(x + 50, y + 50, x + 150, floorPos_y, x + 80, floorPos_y);
 	fill(128);
 	triangle(x + 50, y + 50, x, floorPos_y, x + 80, floorPos_y);
+}
+
+function drawGameScore() {
+	fill(255)
+	noStroke()
+	textSize(20)
+	text(`Score: ${game_score}`, 20, 30)
+}
+
+function drawFlagPole(){
+	push()
+	strokeWeight(5);
+	stroke(150);
+	line(flagpole.x_pos, floorPos_y, flagpole.x_pos, floorPos_y - 250);
+	noStroke();
+	fill(255, 0, 0);
+	rect(flagpole.x_pos, floorPos_y - (flagpole.isReached ? 250 : 50), 50, 50);
+	pop()
+}
+
+function checkFlagpole(){
+	if (flagpole.isReached) return
+	const d = abs(gameChar_x - flagpole.x_pos)
+	if (d < 15) {
+		flagpole.isReached = true;
+	}
+}
+
+function drawLives(){
+	fill(255, 0, 0)
+	noStroke()
+	textSize(20)
+	text(`Lives: ${lives}`, 20, 60)
+}
+
+function drawGameStates() {
+	if (lives <= 0) {
+		textSize(50)
+		text(`Game Over`, 500, 100)
+	}
+
+	if (gameState.finished) {
+		fill(124,255,0)
+		textSize(50)
+		text(`You Won!`, 500, 100)
+	}
+}
+
+function checkLives(){
+	if (state.isPlummeting) {
+		lives -= 1
+	}
+	if (lives <= 0) {
+		gameState.isGameOver = true
+	}
+}
+
+function checkIfGameHasWon() {
+	if (flagpole.isReached && game_score === 3) {
+		gameState.finished = true
+	}
 }
