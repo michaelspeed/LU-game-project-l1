@@ -224,7 +224,6 @@ function draw() {
 	}
 }
 
-
 function keyPressed() {
 
 	if (keyCode === 65 || keyCode === 37) {
