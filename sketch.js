@@ -180,14 +180,13 @@ function draw() {
 
 	// if the collectable item has been found
 	collectables.forEach(collectable => {
-		if (gameChar_x >= collectable.x_pos - collectable.size / 2 && gameChar_x <= collectable.x_pos + collectable.size / 2) {
+		if (dist(gameChar_x, gameChar_y, collectable.x_pos, collectable.y_pos) < 50) {
 			if (!collectable.isFound) {
 				collectable.isFound = true
 				game_score += 1
 			}
 		}
 	})
-
 	// if the game character is over the canyon it falls to death
 	canyons.forEach(canyon => {
 		if (gameChar_x >= (canyon.x_pos) && gameChar_x <= (canyon.x_pos + canyon.width) && !state.isFalling) {
