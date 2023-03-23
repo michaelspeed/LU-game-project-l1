@@ -72,11 +72,16 @@ function setup() {
 	gameChar_y = floorPos_y;
 
 	stickman = new StickMan(gameChar_x, gameChar_y, 'blue', 80)
-	collectables = [{x_pos: 600, y_pos: gameChar_y - 20, size: 30, isFound: false}, {x_pos: 300, y_pos: gameChar_y - 150, size: 30, isFound: false}, {x_pos: 200, y_pos: gameChar_y - 250, size: 30, isFound: false}]
-	canyons = [{x_pos: 200, width: 100}, {x_pos: 600, width: 50}]
-	trees_x = [300, 350, 400, 450, 520,]
-	clouds = [{x:100, y:130}, {x: 350, y: 100}, {x: 600, y: 50}]
-	mountains = [{x:20, height:200}, {x: 800, height: 150}]
+
+	collectables = generateCollectables(50)
+
+	canyons = generateCanyons(3)
+
+	clouds = generateClouds(100)
+
+	mountains = generateMountains(30)
+
+	trees_x = generateTrees(60)
 }
 
 function draw() {
@@ -91,20 +96,21 @@ function draw() {
 
 	push()
 	translate(-cameraPosX, 0)
-	// Draw the collectible object
-	collectables.forEach(drawCollectable)
 
 	//draw the canyon
 	canyons.forEach(drawCanyon)
-
-	// Draw the trees (using forEach loop instead of for loop which is much cleaner)
-	trees_x.forEach(drawTree)
 
 	// Draw the mountains (using forEach loop instead of for loop which is much cleaner)
 	mountains.forEach(drawMountains)
 
 	// Draw the clouds (using forEach loop instead of for loop which is much cleaner)
 	clouds.forEach(drawClouds)
+
+	// Draw the trees (using forEach loop instead of for loop which is much cleaner)
+	trees_x.forEach(drawTree)
+
+	// Draw the collectible object
+	collectables.forEach(drawCollectable)
 
 	drawGameScore()
 
