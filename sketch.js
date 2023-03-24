@@ -12,17 +12,23 @@ Stickman is a superhuman, can jump large distance
 for better playability jumping is done by pressing up arrow key + left or right arrow key and can be controlled in flight
 */
 
+import Store from "./lib/store/index.js";
+import StickMan from "./lib/stickman.js";
+import {INIT_APPLICATION} from "./lib/store/types.js";
+
 var gameChar_x;
 var gameChar_y;
 var floorPos_y;
 
 // Game character states
+/*
 var state = {
 	isLeft: false,
 	isRight: false,
 	isFalling: false,
 	isPlummeting:false,
 }
+*/
 
 // Game character
 var stickman
@@ -66,16 +72,21 @@ var gameState = {
 
 var platforms = []
 
+let store
 
 function setup() {
 	createCanvas(1024, 576);
+
+	store = Store
+	stickman = new StickMan(gameChar_x, gameChar_y, 'blue', 80)
+
+	store.dispatch('initApp', {lives: 10})
+
 	floorPos_y = height * 3/4;
 	gameChar_x = width/2;
 	gameChar_y = floorPos_y;
 
-	stickman = new StickMan(gameChar_x, gameChar_y, 'blue', 80)
-
-	collectables = generateCollectables(50)
+	/*collectables = generateCollectables(50)
 
 	canyons = generateCanyons(3)
 
@@ -85,10 +96,12 @@ function setup() {
 
 	trees_x = generateTrees(60)
 
-	platforms = generatePlatforms(50)
+	platforms = generatePlatforms(50)*/
 }
 
 function draw() {
+
+	console.log(store)
 
 	///////////DRAWING CODE//////////
 	background(100,155,255); //fill the sky blue
