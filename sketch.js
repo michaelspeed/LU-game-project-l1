@@ -101,8 +101,6 @@ function setup() {
 
 function draw() {
 
-	console.log(store)
-
 	///////////DRAWING CODE//////////
 	background(100,155,255); //fill the sky blue
 
