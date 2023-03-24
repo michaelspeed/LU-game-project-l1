@@ -64,6 +64,8 @@ var gameState = {
 	gameOver: false,
 }
 
+var platforms = []
+
 
 function setup() {
 	createCanvas(1024, 576);
@@ -82,6 +84,8 @@ function setup() {
 	mountains = generateMountains(30)
 
 	trees_x = generateTrees(60)
+
+	platforms = generatePlatforms(50)
 }
 
 function draw() {
@@ -123,6 +127,9 @@ function draw() {
 	checkIfGameHasWon()
 
 	drawGameStates()
+
+	// Draw the platforms
+	platforms.forEach(item => item.draw())
 
 	//the game character
 	if(state.isLeft && state.isFalling) {
