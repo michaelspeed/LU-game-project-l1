@@ -260,3 +260,8 @@ function resetStats() {
 	state.isLeft = false
 	state.isRight = false
 }
+
+window.setup = setup
+window.draw = draw
+window.keyPressed = keyPressed
+window.keyReleased = keyReleased
