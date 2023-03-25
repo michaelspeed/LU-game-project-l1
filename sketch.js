@@ -22,7 +22,14 @@ import {drawCollectable} from "./lib/collectable.js";
 import {checkIfGameHasWon, drawGameScore, drawGameStates} from "./lib/score.js";
 import {checkFlagpole, drawFlagPole} from "./lib/flagpole.js";
 import {checkLives, drawLives} from "./lib/lives.js";
-import {characterIsFalling, characterIsJumping, moveLeft, moveRight, resetMovement} from "./lib/interactions.js";
+import {
+	characterIsFalling,
+	characterIsJumping,
+	moveLeft,
+	movements,
+	moveRight,
+	resetMovement
+} from "./lib/interactions.js";
 
 // Game character
 let stickman
@@ -107,30 +114,7 @@ function draw() {
 	})
 
 	if (state) {
-		//the game character
-		if(state.isLeft && state.isFalling) {
-			// add your jumping-left code
-			stickman.renderJumpToLeft(state.gameChar_x, state.gameChar_y, 'red')
-
-		} else if(state.isRight && state.isFalling) {
-			// add your jumping-right code
-			stickman.renderJumpToRight(state.gameChar_x, state.gameChar_y, 'red')
-
-		} else if(state.isLeft) {
-			stickman.renderWalkLeft(state.gameChar_x, state.gameChar_y, 'blue', walkDelta)
-
-		} else if(state.isRight) {
-			// add your walking right code
-			stickman.renderWalkRight(state.gameChar_x, state.gameChar_y, 'blue')
-
-		} else if(state.isFalling || state.isPlummeting) {
-			// add your jumping facing forwards code
-			stickman.renderJumpForward(state.gameChar_x, state.gameChar_y, 'red')
-
-		} else {
-			// add your standing front facing code
-			stickman.render(state.gameChar_x, state.gameChar_y, 'blue')
-		}
+		movements(state, stickman, walkDelta)
 	}
 	pop()
 
@@ -183,7 +167,7 @@ function draw() {
 	})
 	// if the game character is over the canyon it falls to death
 	state.canyons.forEach(canyon => {
-		if (state.gameChar_x >= (canyon.x_pos) && gameChar_x <= (canyon.x_pos + canyon.width) && !state.isFalling) {
+		if (state.gameChar_x >= (canyon.x_pos) && state.gameChar_x <= (canyon.x_pos + canyon.width) && !state.isFalling) {
 			// state.isPlummeting = true
 			commit(state, {isPlummeting: true})
 		}
@@ -195,7 +179,7 @@ function draw() {
 		state.gameChar_y += jumpDelta
 		if (state.gameChar_y > height) {
 			// reset the game
-			checkLives()
+			checkLives(state)
 			commit(state, {isLeft: false, isRight: false, isFalling: false, isPlummeting: false, gameChar_y: state.floorPos_y, gameChar_x: width/2, cameraPosX: 0})
 		}
 	}
