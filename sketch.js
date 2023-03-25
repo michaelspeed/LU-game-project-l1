@@ -1,15 +1,13 @@
 /*
-
 The Game Project - stage 4
 Author: Risha Sringa Chanmgai - (https://github.com/michaelspeed)
 Date: 07-01-2023
-Git status: initialized after 3b, for more info check git history
+Git status: initialized after 3b, for more info check git history - https://github.com/michaelspeed/LU-game-project-l1
 Additional files: p5.js (for better completions in webstorm, preferred IDE)
 
-Zip files: [index.html, sketch.js, p5.js, p5.min.js, .git, .idea]
+Zip files: [index.html, sketch.js, p5.js, p5.min.js, .git, .idea, lib, p5.sound.min.js]
 
 Stickman is a superhuman, can jump large distance
-for better playability jumping is done by pressing up arrow key + left or right arrow key and can be controlled in flight
 */
 
 import StickMan from "./lib/stickman.js";
@@ -39,10 +37,12 @@ let stickman
 const jumpDelta = 100
 const walkDelta = 10
 
+// Application state
 let state = new Proxy(appState, {
 	set: dispatcher
 })
 
+// Application sounds
 let sounds
 
 function preload() {
@@ -56,42 +56,46 @@ function preload() {
 
 function setup() {
 	createCanvas(1024, 576);
+
+	// Initialize the stickman
 	stickman = new StickMan(state.gameChar_x, state.gameChar_y, 'blue', 80, jumpDelta, walkDelta)
 
-	//state = initApplication(appState)
-
+	// Initialize the application state
 	state = commit(state, initApplication(appState, jumpDelta))
 }
 
 function draw() {
-
-	///////////DRAWING CODE//////////
-	background(100,155,255); //fill the sky blue
-
+	// Draw the background
+	background(100,155,255);
 
 	noStroke();
 	fill(0,155,0);
 	rect(0, state.floorPos_y, width, height - state.floorPos_y); //draw some green ground
 
 	push()
+	// Translate the canvas to the camera position
 	translate(-state.cameraPosX, 0)
 
-	//draw the canyon
+	//draw all canyon
 	state.canyons.forEach(drawCanyon)
 
-	// Draw the mountains (using forEach loop instead of for loop which is much cleaner)
+	// Draw all mountains (using forEach loop instead of for loop which is much cleaner)
 	state.mountains.forEach((item) => drawMountains({x: item.x, height: item.height, appState: state}))
 
-	// Draw the clouds (using forEach loop instead of for loop which is much cleaner)
+	// Draw all clouds (using forEach loop instead of for loop which is much cleaner)
 	state.clouds.forEach(item => drawClouds({x: item.x, y: item.y}))
 
-	// Draw the trees (using forEach loop instead of for loop which is much cleaner)
+	// Draw all trees (using forEach loop instead of for loop which is much cleaner)
 	state.trees_x.forEach(item => drawTree(item))
 
-	// Draw the collectible object
+	// Draw all collectible object
 	state.collectables.forEach(drawCollectable)
 
+	// Draw all enemies
 	state.enemies.forEach(item => item.draw())
+
+	// Draw the platforms
+	state.platforms.forEach(item => item.draw())
 
 	drawFlagPole(appState.flagpole, appState.floorPos_y)
 
@@ -103,9 +107,7 @@ function draw() {
 
 	drawScoreBoard(appState)
 
-	// Draw the platforms
-	state.platforms.forEach(item => item.draw())
-
+	// Check enemies contact
 	state.enemies.forEach(enemy => {
 		const isInContact = enemy.contact(appState.gameChar_x, appState.gameChar_y, sounds)
 		if (isInContact) {
@@ -113,57 +115,61 @@ function draw() {
 		}
 	})
 
+	// Movements
 	if (state) {
 		movements(state, stickman, walkDelta)
 	}
 
+	// Lives
 	checkLives(state)
+
 	pop()
 
 	///////////INTERACTION CODE//////////
 
 	if (state.isLeft) {
 		// move the game character to the left
-		// state.gameChar_x -= walkDelta
 		moveLeft(state, walkDelta, state.platforms)
 	}
 
 	if (state.isRight) {
 		// move the game character to the right
-		// state.gameChar_x += walkDelta
 		moveRight(state, walkDelta, state.platforms)
 	}
 	if (state.isFalling) {
 		// character is falling
-		//state.gameChar_y -= jumpDelta
 		characterIsFalling(state, state.platforms)
 	}
 	if (state.isJumping) {
+		// character is jumping
 		characterIsJumping(state, jumpDelta, sounds)
 	}
 
-	// if the collectable item has been found
 	if (!state.gameOver) {
+		// check if the collectable item has been found
 		state.collectables.forEach(collectable => {
 			if (dist(state.gameChar_x, state.gameChar_y, collectable.x_pos, collectable.y_pos) < 50) {
 				if (!collectable.isFound) {
 					sounds.collect.play()
 					collectable.isFound = true
 					commit(state, {game_score: state.game_score + 1})
-					//state.game_score += 1
 				}
 			}
 		})
 	}
+
 	// if the game character is over the canyon it falls to death
-	state.canyons.forEach(canyon => {
-		if (state.gameChar_x >= (canyon.x_pos) && state.gameChar_x <= (canyon.x_pos + canyon.width) && !state.isFalling) {
-			if (!state.isPlummeting) {
-				commit(appState, {lives: appState.lives - 1})
+	if (!state.isPlummeting) {
+		state.canyons.forEach(canyon => {
+			if (state.gameChar_x >= (canyon.x_pos) && state.gameChar_x <= (canyon.x_pos + canyon.width) && !state.isFalling) {
+				if (!state.isPlummeting) {
+					// if the game character is over the canyon it falls to death
+					commit(appState, {lives: appState.lives - 1})
+				}
+				commit(state, {isPlummeting: true})
 			}
-			commit(state, {isPlummeting: true})
-		}
-	})
+		})
+	}
 
 	// if the game character has fallen to death, reset the game
 	if (state.isPlummeting) {
