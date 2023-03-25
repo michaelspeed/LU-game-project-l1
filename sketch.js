@@ -10,10 +10,21 @@ Zip files: [index.html, sketch.js, p5.js, p5.min.js, .git, .idea, lib, p5.sound.
 Stickman is a superhuman, can jump large distance
 
 ////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
 WARNING: JS modules are in use, please use a supported modern browser to run this project
 for more info on browser compatibility check: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules
 
 Chrome, however, blocks file: protocol by default. To enable it, you need to launch Chrome from a command prompt, specifying the --allow-file-access-from-files flag.
+
+or install Node.js from - https://nodejs.org/en/download/
+and run the following command in the project directory
+
+------------------------------------------------
+$ npm install
+$ npm start
+------------------------------------------------
+
+///////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////
 
 */
