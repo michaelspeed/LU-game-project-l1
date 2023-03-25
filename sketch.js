@@ -22,7 +22,7 @@ import {drawCollectable} from "./lib/collectable.js";
 import {checkIfGameHasWon, drawGameScore, drawGameStates} from "./lib/score.js";
 import {checkFlagpole, drawFlagPole} from "./lib/flagpole.js";
 import {checkLives, drawLives} from "./lib/lives.js";
-import {characterIsFalling, characterIsJumping} from "./lib/interactions.js";
+import {characterIsFalling, characterIsJumping, moveLeft, moveRight, resetMovement} from "./lib/interactions.js";
 
 // Game character
 let stickman
@@ -35,25 +35,23 @@ let state = new Proxy(appState, {
 	set: dispatcher
 })
 
+let sounds
+
+function preload() {
+	sounds = {
+		jump: loadSound('assets/jump.wav'),
+		hit: loadSound('assets/hit.wav'),
+		collect: loadSound('assets/collect.wav'),
+	}
+}
+
 function setup() {
 	createCanvas(1024, 576);
 	stickman = new StickMan(state.gameChar_x, state.gameChar_y, 'blue', 80, jumpDelta, walkDelta)
 
 	//state = initApplication(appState)
 
-	state = commit(state, initApplication(appState))
-
-	/*collectables = generateCollectables(50)
-
-	canyons = generateCanyons(3)
-
-	clouds = generateClouds(100)
-
-	mountains = generateMountains(30)
-
-	trees_x = generateTrees(60)
-
-	platforms = generatePlatforms(50)*/
+	state = commit(state, initApplication(appState, jumpDelta))
 }
 
 function draw() {
@@ -84,6 +82,8 @@ function draw() {
 	// Draw the collectible object
 	state.collectables.forEach(drawCollectable)
 
+	state.enemies.forEach(item => item.draw())
+
 	drawGameScore(appState.game_score)
 
 	drawFlagPole(appState.flagpole, appState.floorPos_y)
@@ -99,6 +99,13 @@ function draw() {
 	// Draw the platforms
 	state.platforms.forEach(item => item.draw())
 
+	state.enemies.forEach(enemy => {
+		const isInContact = enemy.contact(appState.gameChar_x, appState.gameChar_y, sounds)
+		if (isInContact) {
+			commit(state, {lives: state.lives - 1})
+		}
+	})
+
 	if (state) {
 		//the game character
 		if(state.isLeft && state.isFalling) {
@@ -110,7 +117,7 @@ function draw() {
 			stickman.renderJumpToRight(state.gameChar_x, state.gameChar_y, 'red')
 
 		} else if(state.isLeft) {
-			stickman.renderWalkLeft(state.gameChar_x, state.gameChar_y, 'blue')
+			stickman.renderWalkLeft(state.gameChar_x, state.gameChar_y, 'blue', walkDelta)
 
 		} else if(state.isRight) {
 			// add your walking right code
@@ -123,7 +130,6 @@ function draw() {
 		} else {
 			// add your standing front facing code
 			stickman.render(state.gameChar_x, state.gameChar_y, 'blue')
-
 		}
 	}
 	pop()
@@ -134,13 +140,13 @@ function draw() {
 	if (state.isLeft) {
 		// move the game character to the left
 		// state.gameChar_x -= walkDelta
-		commit(state, {gameChar_x: state.gameChar_x - walkDelta, cameraPosX: state.cameraPosX - walkDelta})
+		moveLeft(state, walkDelta, state.platforms)
 	}
 
 	if (state.isRight) {
 		// move the game character to the right
 		// state.gameChar_x += walkDelta
-		commit(state, {gameChar_x: state.gameChar_x + walkDelta, cameraPosX: state.cameraPosX + walkDelta})
+		moveRight(state, walkDelta, state.platforms)
 	}
 
 	/*if (state.isFalling && (state.isLeft || state.isRight)) {
@@ -158,15 +164,17 @@ function draw() {
 	if (state.isFalling) {
 		// character is falling
 		//state.gameChar_y -= jumpDelta
-		characterIsFalling(state, jumpDelta)
-	} else if (state.isJumping) {
-		characterIsJumping(state, jumpDelta)
+		characterIsFalling(state, state.platforms)
+	}
+	if (state.isJumping) {
+		characterIsJumping(state, jumpDelta, sounds)
 	}
 
 	// if the collectable item has been found
 	state.collectables.forEach(collectable => {
 		if (dist(state.gameChar_x, state.gameChar_y, collectable.x_pos, collectable.y_pos) < 50) {
 			if (!collectable.isFound) {
+				sounds.collect.play()
 				collectable.isFound = true
 				commit(state, {game_score: state.game_score + 1})
 				//state.game_score += 1
@@ -224,19 +232,18 @@ function keyPressed() {
 	}
 
 	if ((keyCode === 38 || keyCode === 87)) {
-		state = commit(state, {isJumping: true, jumpState: {initial: state.gameChar_y, final: state.gameChar_y - jumpDelta}})
+		if (!state.isJumping && !state.isFalling) {
+			sounds.jump.play()
+			state = commit(state, {isJumping: true, jumpState: {initial: state.gameChar_y, final: state.gameChar_y - jumpDelta}})
+		}
 	}
 }
 
 function keyReleased() {
-	// resetStats()
+	resetMovement(state)
 }
 
-// resets necessary states
-function resetStats() {
-	state = commit(state, {isLeft: false, isRight: false, isJumping: false})
-}
-
+window.preload = preload
 window.setup = setup
 window.draw = draw
 window.keyPressed = keyPressed
