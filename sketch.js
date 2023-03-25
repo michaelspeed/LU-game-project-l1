@@ -12,79 +12,36 @@ Stickman is a superhuman, can jump large distance
 for better playability jumping is done by pressing up arrow key + left or right arrow key and can be controlled in flight
 */
 
-import Store from "./lib/store/index.js";
 import StickMan from "./lib/stickman.js";
-import {INIT_APPLICATION} from "./lib/store/types.js";
-
-var gameChar_x;
-var gameChar_y;
-var floorPos_y;
-
-// Game character states
-/*
-var state = {
-	isLeft: false,
-	isRight: false,
-	isFalling: false,
-	isPlummeting:false,
-}
-*/
+import appState, {commit, dispatcher, initApplication} from "./lib/store/appState.js";
+import {drawCanyon} from "./lib/canyon.js";
+import {drawMountains} from "./lib/mountain.js";
+import {drawClouds} from "./lib/clouds.js";
+import {drawTree} from "./lib/tree.js";
+import {drawCollectable} from "./lib/collectable.js";
+import {checkIfGameHasWon, drawGameScore, drawGameStates} from "./lib/score.js";
+import {checkFlagpole, drawFlagPole} from "./lib/flagpole.js";
+import {checkLives, drawLives} from "./lib/lives.js";
+import {characterIsFalling, characterIsJumping} from "./lib/interactions.js";
 
 // Game character
-var stickman
+let stickman
 
 // Movement constants
-const jumpDelta = 4
+const jumpDelta = 100
 const walkDelta = 10
 
-// Collectable
-var collectables = [];
-
-// Canyon
-var canyons = [];
-
-// Trees
-var trees_x = []
-
-// Clouds
-var clouds = []
-
-// Mountains
-var mountains = []
-
-// Camera positioning
-var cameraPosX = 0
-
-// Game Score
-var game_score = 0
-
-// Flagpole
-var flagpole = {x_pos: 100, isReached: false}
-
-// Lives
-var lives = 3
-
-// Game State
-var gameState = {
-	finished: false,
-	gameOver: false,
-}
-
-var platforms = []
-
-let store
+let state = new Proxy(appState, {
+	set: dispatcher
+})
 
 function setup() {
 	createCanvas(1024, 576);
+	stickman = new StickMan(state.gameChar_x, state.gameChar_y, 'blue', 80, jumpDelta, walkDelta)
 
-	store = Store
-	stickman = new StickMan(gameChar_x, gameChar_y, 'blue', 80)
+	//state = initApplication(appState)
 
-	store.dispatch('initApp', {lives: 10})
-
-	floorPos_y = height * 3/4;
-	gameChar_x = width/2;
-	gameChar_y = floorPos_y;
+	state = commit(state, initApplication(appState))
 
 	/*collectables = generateCollectables(50)
 
@@ -107,169 +64,177 @@ function draw() {
 
 	noStroke();
 	fill(0,155,0);
-	rect(0, floorPos_y, width, height - floorPos_y); //draw some green ground
+	rect(0, state.floorPos_y, width, height - state.floorPos_y); //draw some green ground
 
 	push()
-	translate(-cameraPosX, 0)
+	translate(-state.cameraPosX, 0)
 
 	//draw the canyon
-	canyons.forEach(drawCanyon)
+	state.canyons.forEach(drawCanyon)
 
 	// Draw the mountains (using forEach loop instead of for loop which is much cleaner)
-	mountains.forEach(drawMountains)
+	state.mountains.forEach((item) => drawMountains({x: item.x, height: item.height, appState: state}))
 
 	// Draw the clouds (using forEach loop instead of for loop which is much cleaner)
-	clouds.forEach(drawClouds)
+	state.clouds.forEach(item => drawClouds({x: item.x, y: item.y}))
 
 	// Draw the trees (using forEach loop instead of for loop which is much cleaner)
-	trees_x.forEach(drawTree)
+	state.trees_x.forEach(item => drawTree(item))
 
 	// Draw the collectible object
-	collectables.forEach(drawCollectable)
+	state.collectables.forEach(drawCollectable)
 
-	drawGameScore()
+	drawGameScore(appState.game_score)
 
-	drawFlagPole()
+	drawFlagPole(appState.flagpole, appState.floorPos_y)
 
-	checkFlagpole()
+	checkFlagpole(appState)
 
-	drawLives()
+	drawLives(appState)
 
-	checkIfGameHasWon()
+	checkIfGameHasWon(appState)
 
-	drawGameStates()
+	drawGameStates(appState)
 
 	// Draw the platforms
-	platforms.forEach(item => item.draw())
+	state.platforms.forEach(item => item.draw())
 
-	//the game character
-	if(state.isLeft && state.isFalling) {
-		// add your jumping-left code
-		stickman.renderJumpToLeft(gameChar_x, gameChar_y, 'red')
+	if (state) {
+		//the game character
+		if(state.isLeft && state.isFalling) {
+			// add your jumping-left code
+			stickman.renderJumpToLeft(state.gameChar_x, state.gameChar_y, 'red')
 
-	} else if(state.isRight && state.isFalling) {
-		// add your jumping-right code
-		stickman.renderJumpToRight(gameChar_x, gameChar_y, 'red')
+		} else if(state.isRight && state.isFalling) {
+			// add your jumping-right code
+			stickman.renderJumpToRight(state.gameChar_x, state.gameChar_y, 'red')
 
-	} else if(state.isLeft) {
-		// add your walking left code
-		stickman.renderWalkLeft(gameChar_x, gameChar_y, 'blue')
+		} else if(state.isLeft) {
+			stickman.renderWalkLeft(state.gameChar_x, state.gameChar_y, 'blue')
 
-	} else if(state.isRight) {
-		// add your walking right code
-		stickman.renderWalkRight(gameChar_x, gameChar_y, 'blue')
+		} else if(state.isRight) {
+			// add your walking right code
+			stickman.renderWalkRight(state.gameChar_x, state.gameChar_y, 'blue')
 
-	} else if(state.isFalling || state.isPlummeting) {
-		// add your jumping facing forwards code
-		stickman.renderJumpForward(gameChar_x, gameChar_y, 'red')
+		} else if(state.isFalling || state.isPlummeting) {
+			// add your jumping facing forwards code
+			stickman.renderJumpForward(state.gameChar_x, state.gameChar_y, 'red')
 
-	} else {
-		// add your standing front facing code
-		stickman.render(gameChar_x, gameChar_y, 'blue')
+		} else {
+			// add your standing front facing code
+			stickman.render(state.gameChar_x, state.gameChar_y, 'blue')
 
+		}
 	}
 	pop()
+
+	//console.log(state.isFalling)
 
 	///////////INTERACTION CODE//////////
 	if (state.isLeft) {
 		// move the game character to the left
-		gameChar_x -= walkDelta
+		// state.gameChar_x -= walkDelta
+		commit(state, {gameChar_x: state.gameChar_x - walkDelta, cameraPosX: state.cameraPosX - walkDelta})
 	}
 
 	if (state.isRight) {
 		// move the game character to the right
-		gameChar_x += walkDelta
+		// state.gameChar_x += walkDelta
+		commit(state, {gameChar_x: state.gameChar_x + walkDelta, cameraPosX: state.cameraPosX + walkDelta})
 	}
 
-	if (state.isFalling && (state.isLeft || state.isRight)) {
+	/*if (state.isFalling && (state.isLeft || state.isRight)) {
 		// move the game character up
-		gameChar_y -= jumpDelta
-	} else if (state.isFalling && gameChar_y < floorPos_y) {
+		commit(state, {gameChar_y: state.gameChar_y - jumpDelta})
+	} else if (state.isFalling && state.gameChar_y < state.floorPos_y) {
 		// move the game character down
-		gameChar_y += jumpDelta
-		if (gameChar_y === floorPos_y) {
+		// state.gameChar_y += jumpDelta
+		commit(state, {gameChar_y: state.gameChar_y + jumpDelta})
+		if (state.gameChar_y === state.floorPos_y) {
 			// character has landed
-			state.isFalling = false
+			commit(state, {isFalling: false})
 		}
-	} else if (state.isFalling) {
+	}*/
+	if (state.isFalling) {
 		// character is falling
-		gameChar_y -= jumpDelta
+		//state.gameChar_y -= jumpDelta
+		characterIsFalling(state, jumpDelta)
+	} else if (state.isJumping) {
+		characterIsJumping(state, jumpDelta)
 	}
 
 	// if the collectable item has been found
-	collectables.forEach(collectable => {
-		if (dist(gameChar_x, gameChar_y, collectable.x_pos, collectable.y_pos) < 50) {
+	state.collectables.forEach(collectable => {
+		if (dist(state.gameChar_x, state.gameChar_y, collectable.x_pos, collectable.y_pos) < 50) {
 			if (!collectable.isFound) {
 				collectable.isFound = true
-				game_score += 1
+				commit(state, {game_score: state.game_score + 1})
+				//state.game_score += 1
 			}
 		}
 	})
 	// if the game character is over the canyon it falls to death
-	canyons.forEach(canyon => {
-		if (gameChar_x >= (canyon.x_pos) && gameChar_x <= (canyon.x_pos + canyon.width) && !state.isFalling) {
-			state.isPlummeting = true
+	state.canyons.forEach(canyon => {
+		if (state.gameChar_x >= (canyon.x_pos) && gameChar_x <= (canyon.x_pos + canyon.width) && !state.isFalling) {
+			// state.isPlummeting = true
+			commit(state, {isPlummeting: true})
 		}
 	})
 
 	// if the game character has fallen to death, reset the game
 	if (state.isPlummeting) {
 		state.isFalling = false
-		gameChar_y += jumpDelta
-		if (gameChar_y > height) {
+		state.gameChar_y += jumpDelta
+		if (state.gameChar_y > height) {
 			// reset the game
 			checkLives()
-			state.isPlummeting = false
-			gameChar_y = floorPos_y
-			gameChar_x = width/2
-			cameraPosX = 0
+			commit(state, {isLeft: false, isRight: false, isFalling: false, isPlummeting: false, gameChar_y: state.floorPos_y, gameChar_x: width/2, cameraPosX: 0})
 		}
 	}
 
 	// No loop needed if we use keyIsDown
-	if (keyIsDown(LEFT_ARROW)) {
-		if (state.isFalling && gameChar_y < floorPos_y) {
+	/*if (keyIsDown(LEFT_ARROW)) {
+		if (state.isFalling && state.gameChar_y < state.floorPos_y) {
 			if (keyIsDown(UP_ARROW)) {
-				cameraPosX -= walkDelta
+				state.cameraPosX -= walkDelta
 			}
 		} else {
-			cameraPosX -= walkDelta
+			state.cameraPosX -= walkDelta
 		}
 	}
 	if (keyIsDown(RIGHT_ARROW)) {
-		if (state.isFalling && gameChar_y < floorPos_y) {
+		if (state.isFalling && state.gameChar_y < state.floorPos_y) {
 			if (keyIsDown(UP_ARROW)) {
-				cameraPosX += walkDelta
+				state.cameraPosX += walkDelta
 			}
 		} else {
-			cameraPosX += walkDelta
+			state.cameraPosX += walkDelta
 		}
-	}
+	}*/
 }
 
 function keyPressed() {
 
 	if (keyCode === 65 || keyCode === 37) {
-		state.isLeft = true;
+		state = commit(state, {isLeft: true})
 	}
 
 	if (keyCode === 68 || keyCode === 39) {
-		state.isRight = true;
+		state = commit(state, {isRight: true})
 	}
 
-	if ((keyCode === 38 || keyCode === 87) && !state.isFalling) {
-		state.isFalling = true;
+	if ((keyCode === 38 || keyCode === 87)) {
+		state = commit(state, {isJumping: true, jumpState: {initial: state.gameChar_y, final: state.gameChar_y - jumpDelta}})
 	}
 }
 
 function keyReleased() {
-	resetStats()
+	// resetStats()
 }
 
 // resets necessary states
 function resetStats() {
-	state.isLeft = false
-	state.isRight = false
+	state = commit(state, {isLeft: false, isRight: false, isJumping: false})
 }
 
 window.setup = setup
