@@ -12,6 +12,8 @@ Stickman is a superhuman, can jump large distance
 ////////////////////////////////////////////////////////////////
 WARNING: JS modules are in use, please use a supported modern browser to run this project
 for more info on browser compatibility check: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules
+
+Chrome, however, blocks file: protocol by default. To enable it, you need to launch Chrome from a command prompt, specifying the --allow-file-access-from-files flag.
 ///////////////////////////////////////////////////////////////
 
 */

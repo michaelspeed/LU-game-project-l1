@@ -1,0 +1,25 @@
+{
+  "name": "game-project---6",
+  "version": "1.0.0",
+  "description": "Following is the list of previous versions of the project (3b).",
+  "main": "server.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/michaelspeed/LU-game-project-l1.git"
+  },
+  "author": "risha sringa changmai",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/michaelspeed/LU-game-project-l1/issues"
+  },
+  "homepage": "https://github.com/michaelspeed/LU-game-project-l1#readme",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
