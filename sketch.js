@@ -1,13 +1,16 @@
 /*
-The Game Project - stage 4
+The Game Project - stage final
 Author: Risha Sringa Chanmgai - (https://github.com/michaelspeed)
-Date: 07-01-2023
+Date: 25-03-2023
 Git status: initialized after 3b, for more info check git history - https://github.com/michaelspeed/LU-game-project-l1
 Additional files: p5.js (for better completions in webstorm, preferred IDE)
 
 Zip files: [index.html, sketch.js, p5.js, p5.min.js, .git, .idea, lib, p5.sound.min.js]
 
 Stickman is a superhuman, can jump large distance
+
+WARNING: JS modules are in use, please use a supported modern browser to run this project
+for more info on browser compatibility check: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules
 */
 
 import StickMan from "./lib/stickman.js";
