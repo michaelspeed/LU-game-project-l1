@@ -9,8 +9,11 @@ Zip files: [index.html, sketch.js, p5.js, p5.min.js, .git, .idea, lib, p5.sound.
 
 Stickman is a superhuman, can jump large distance
 
+////////////////////////////////////////////////////////////////
 WARNING: JS modules are in use, please use a supported modern browser to run this project
 for more info on browser compatibility check: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules
+///////////////////////////////////////////////////////////////
+
 */
 
 import StickMan from "./lib/stickman.js";
